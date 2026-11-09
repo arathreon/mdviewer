@@ -1,0 +1,894 @@
+/* mdviewer page style. Similar to GitHub, with light and dark themes. */
+
+/* Theme: `color-scheme` selects the light or the dark value of each light-dark() color.
+   <html data-theme="auto"> follows Windows; "light" and "dark" are the choices of the user. */
+
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root {
+  --fg: light-dark(#1f2328, #f0f6fc);
+  --fg-muted: light-dark(#59636e, #9198a1);
+  --bg: light-dark(#ffffff, #0d1117);
+  --bg-subtle: light-dark(#f6f8fa, #151b23);
+  --border: light-dark(#d1d9e0, #3d444d);
+  --border-muted: light-dark(#d1d9e0b3, #3d444db3);
+  --link: light-dark(#0969da, #4493f8);
+  --code-bg: light-dark(#818b981f, #656c7633);
+  --mark-bg: light-dark(#fff8c5, #bb800966);
+  --note: light-dark(#0969da, #4493f8);
+  --tip: light-dark(#1a7f37, #3fb950);
+  --important: light-dark(#8250df, #ab7df8);
+  --warning: light-dark(#9a6700, #d29922);
+  --caution: light-dark(#d1242f, #f85149);
+  --cyan: light-dark(#0a8a9e, #39c5cf);
+  --orange: light-dark(#bc4c00, #db6d28);
+  --gray: light-dark(#59636e, #9198a1);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.markdown-body {
+  box-sizing: border-box;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+}
+
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 16px;
+  }
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Text blocks */
+
+p, blockquote, ul, ol, dl, table, pre, details, .markdown-alert, .callout {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1em; }
+h5 { font-size: 0.875em; }
+h6 { font-size: 0.85em; color: var(--fg-muted); }
+
+h1, h2 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+/* Heading links: a "#" after the heading text when the pointer is on the heading. */
+.anchor {
+  margin-left: 0.3em;
+  color: var(--fg-muted);
+  opacity: 0;
+}
+
+.anchor::before {
+  content: "#";
+}
+
+.anchor:hover {
+  text-decoration: none;
+}
+
+:is(h1, h2, h3, h4, h5, h6):hover > .anchor,
+.anchor:focus {
+  opacity: 1;
+}
+
+hr {
+  height: 0.25em;
+  margin: 24px 0;
+  padding: 0;
+  background: var(--border);
+  border: 0;
+}
+
+blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0 1em;
+  color: var(--fg-muted);
+  border-left: 0.25em solid var(--border);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+mark {
+  color: inherit;
+  background: var(--mark-bg);
+}
+
+img {
+  max-width: 100%;
+  box-sizing: content-box;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  line-height: 10px;
+  vertical-align: middle;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+
+details summary {
+  cursor: pointer;
+}
+
+/* Lists */
+
+ul, ol {
+  padding-left: 2em;
+}
+
+li + li {
+  margin-top: 0.25em;
+}
+
+li > p {
+  margin-top: 16px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.contains-task-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.contains-task-list .contains-task-list {
+  padding-left: 2em;
+}
+
+.task-list-item-checkbox {
+  margin: 0 0.2em 0.25em 0;
+  vertical-align: middle;
+}
+
+dl dt {
+  margin-top: 16px;
+  font-weight: 600;
+}
+
+dl dd {
+  margin: 0 0 16px;
+  padding: 0 16px;
+}
+
+/* Code */
+
+code, pre {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 85%;
+}
+
+code {
+  padding: 0.2em 0.4em;
+  white-space: break-spaces;
+  background: var(--code-bg);
+  border-radius: 6px;
+}
+
+pre {
+  padding: 16px;
+  overflow: auto;
+  line-height: 1.45;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+}
+
+pre code {
+  padding: 0;
+  font-size: 100%;
+  white-space: pre;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Tables */
+
+table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+th {
+  font-weight: 600;
+}
+
+th, td {
+  padding: 6px 13px;
+  border: 1px solid var(--border);
+}
+
+tr {
+  background: var(--bg);
+  border-top: 1px solid var(--border-muted);
+}
+
+tr:nth-child(2n) {
+  background: var(--bg-subtle);
+}
+
+/* Code colors (highlight.js classes, GitHub colors) */
+
+.hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-template-tag,
+.hljs-template-variable, .hljs-type, .hljs-variable.language_ {
+  color: light-dark(#cf222e, #ff7b72);
+}
+
+.hljs-title, .hljs-title.class_, .hljs-title.class_.inherited__, .hljs-title.function_ {
+  color: light-dark(#8250df, #d2a8ff);
+}
+
+.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator,
+.hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id {
+  color: light-dark(#0550ae, #79c0ff);
+}
+
+.hljs-regexp, .hljs-string, .hljs-meta .hljs-string {
+  color: light-dark(#0a3069, #a5d6ff);
+}
+
+.hljs-built_in, .hljs-symbol {
+  color: light-dark(#953800, #ffa657);
+}
+
+.hljs-comment, .hljs-code, .hljs-formula {
+  color: light-dark(#59636e, #9198a1);
+}
+
+.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo {
+  color: light-dark(#116329, #7ee787);
+}
+
+.hljs-section {
+  color: light-dark(#0550ae, #1f6feb);
+  font-weight: bold;
+}
+
+.hljs-bullet {
+  color: light-dark(#953800, #f2cc60);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-addition {
+  color: light-dark(#116329, #aff5b4);
+  background-color: light-dark(#f0fff4, #033a16);
+}
+
+.hljs-deletion {
+  color: light-dark(#82071e, #ffdcd7);
+  background-color: light-dark(#ffebe9, #67060c);
+}
+
+/* Math (KaTeX) */
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+/* Diagrams (Mermaid) */
+
+.mdviewer-diagram {
+  margin-bottom: 16px;
+  overflow-x: auto;
+  text-align: center;
+}
+
+/* Until Mermaid draws it, the diagram shows its source like a code block. */
+.mdviewer-pending,
+.mdviewer-diagram.mdviewer-error {
+  padding: 16px;
+  font: 85% ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  white-space: pre;
+  text-align: left;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+}
+
+.mdviewer-pending {
+  color: var(--fg-muted);
+}
+
+.mdviewer-error {
+  color: var(--caution);
+}
+
+/* Footnotes */
+
+.footnotes {
+  margin-top: 32px;
+  padding-top: 16px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.footnotes ol {
+  padding-left: 16px;
+}
+
+/* GitHub alerts: > [!NOTE] */
+
+.markdown-alert {
+  padding: 8px 16px;
+  color: inherit;
+  border-left: 0.25em solid var(--alert);
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert-title {
+  font-weight: 500;
+  color: var(--alert);
+}
+
+.markdown-alert-note { --alert: var(--note); --icon: url("/_mdviewer/octicons/info-16.svg"); }
+.markdown-alert-tip { --alert: var(--tip); --icon: url("/_mdviewer/octicons/light-bulb-16.svg"); }
+.markdown-alert-important { --alert: var(--important); --icon: url("/_mdviewer/octicons/report-16.svg"); }
+.markdown-alert-warning { --alert: var(--warning); --icon: url("/_mdviewer/octicons/alert-16.svg"); }
+.markdown-alert-caution { --alert: var(--caution); --icon: url("/_mdviewer/octicons/stop-16.svg"); }
+
+/* Icons of alerts and callouts: the SVG is a mask, and the color is the text color of
+   the title. Thus, each icon is monochrome in the color of its block and follows the
+   theme. GitHub alerts use Octicons (as GitHub), callouts use Lucide (as Obsidian). */
+/* The icon is in the left padding, not in the text flow: comrak writes a line break
+   before a custom callout title, which would show as a space after an inline icon. */
+.markdown-alert-title,
+.callout-title {
+  position: relative;
+  padding-left: 24px;
+}
+
+.markdown-alert-title::before,
+.callout-title::before {
+  content: "";
+  position: absolute;
+  top: calc(0.5lh - 8px);
+  left: 0;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+/* Obsidian callouts: > [!faq]- Title */
+
+.callout {
+  --callout: var(--note);
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--callout) 10%, transparent);
+  border-left: 0.25em solid var(--callout);
+  border-radius: 4px;
+}
+
+.callout-title {
+  font-weight: 600;
+  color: var(--callout);
+}
+
+.callout-title > p {
+  display: inline;
+}
+
+.callout-content {
+  margin-top: 8px;
+}
+
+.callout-content > :last-child {
+  margin-bottom: 0;
+}
+
+.callout:is([data-callout-fold="collapsed"], [data-callout-fold="expanded"]) > .callout-title {
+  cursor: pointer;
+  user-select: none;
+}
+
+.callout[data-callout-fold="collapsed"] > .callout-title::after {
+  content: " \25B8";
+}
+
+.callout[data-callout-fold="expanded"] > .callout-title::after {
+  content: " \25BE";
+}
+
+.callout[data-callout-fold="collapsed"] > .callout-content {
+  display: none;
+}
+
+.callout:is([data-callout="abstract" i], [data-callout="summary" i], [data-callout="tldr" i],
+  [data-callout="tip" i], [data-callout="hint" i], [data-callout="important" i]) {
+  --callout: var(--cyan);
+}
+
+.callout:is([data-callout="success" i], [data-callout="check" i], [data-callout="done" i]) {
+  --callout: var(--tip);
+}
+
+.callout:is([data-callout="question" i], [data-callout="help" i], [data-callout="faq" i],
+  [data-callout="warning" i], [data-callout="caution" i], [data-callout="attention" i]) {
+  --callout: var(--orange);
+}
+
+.callout:is([data-callout="failure" i], [data-callout="fail" i], [data-callout="missing" i],
+  [data-callout="danger" i], [data-callout="error" i], [data-callout="bug" i]) {
+  --callout: var(--caution);
+}
+
+.callout[data-callout="example" i] {
+  --callout: var(--important);
+}
+
+.callout:is([data-callout="quote" i], [data-callout="cite" i]) {
+  --callout: var(--gray);
+}
+
+/* Callout icons (Obsidian's mapping). Some types share a color but not an icon, so
+   these rules are separate from the color rules. Unknown types keep the pencil. */
+.callout {
+  --icon: url("/_mdviewer/lucide/pencil.svg");
+}
+
+.callout:is([data-callout="abstract" i], [data-callout="summary" i], [data-callout="tldr" i]) {
+  --icon: url("/_mdviewer/lucide/clipboard-list.svg");
+}
+
+.callout[data-callout="info" i] {
+  --icon: url("/_mdviewer/lucide/info.svg");
+}
+
+.callout[data-callout="todo" i] {
+  --icon: url("/_mdviewer/lucide/circle-check.svg");
+}
+
+.callout:is([data-callout="tip" i], [data-callout="hint" i], [data-callout="important" i]) {
+  --icon: url("/_mdviewer/lucide/flame.svg");
+}
+
+.callout:is([data-callout="success" i], [data-callout="check" i], [data-callout="done" i]) {
+  --icon: url("/_mdviewer/lucide/check.svg");
+}
+
+.callout:is([data-callout="question" i], [data-callout="help" i], [data-callout="faq" i]) {
+  --icon: url("/_mdviewer/lucide/circle-help.svg");
+}
+
+.callout:is([data-callout="warning" i], [data-callout="caution" i], [data-callout="attention" i]) {
+  --icon: url("/_mdviewer/lucide/triangle-alert.svg");
+}
+
+.callout:is([data-callout="failure" i], [data-callout="fail" i], [data-callout="missing" i]) {
+  --icon: url("/_mdviewer/lucide/x.svg");
+}
+
+.callout:is([data-callout="danger" i], [data-callout="error" i]) {
+  --icon: url("/_mdviewer/lucide/zap.svg");
+}
+
+.callout[data-callout="bug" i] {
+  --icon: url("/_mdviewer/lucide/bug.svg");
+}
+
+.callout[data-callout="example" i] {
+  --icon: url("/_mdviewer/lucide/list.svg");
+}
+
+.callout:is([data-callout="quote" i], [data-callout="cite" i]) {
+  --icon: url("/_mdviewer/lucide/quote.svg");
+}
+
+/* Toolbar of the viewer (top right) */
+
+.mdviewer-toolbar {
+  position: fixed;
+  top: 8px;
+  right: 20px;
+  z-index: 10;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.mdviewer-toolbar:hover,
+.mdviewer-toolbar:focus-within {
+  opacity: 1;
+}
+
+.mdviewer-toolbar select,
+.mdviewer-toolbar button {
+  padding: 2px 4px;
+  color: var(--fg);
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Back, forward and history buttons (top left). The icons are masks, as for alerts. */
+
+.mdviewer-nav {
+  position: fixed;
+  top: 8px;
+  left: 12px;
+  z-index: 12;
+  display: flex;
+  gap: 4px;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.mdviewer-nav:hover,
+.mdviewer-nav:focus-within,
+:root[data-panel="show"] .mdviewer-nav {
+  opacity: 1;
+}
+
+.mdviewer-nav button {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  color: var(--fg);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mdviewer-nav button::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  background-color: currentColor;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+.mdviewer-nav button:disabled {
+  color: var(--fg-muted);
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mdviewer-nav button[aria-pressed="true"] {
+  color: var(--link);
+  border-color: var(--link);
+}
+
+#mdviewer-back {
+  --icon: url("/_mdviewer/lucide/arrow-left.svg");
+}
+
+#mdviewer-forward {
+  --icon: url("/_mdviewer/lucide/arrow-right.svg");
+}
+
+#mdviewer-panel-button {
+  --icon: url("/_mdviewer/lucide/history.svg");
+}
+
+/* The width that the panel shows: the saved width (--panel-width, from <html style>),
+   but at least 160 px, and the page keeps at least 600 px (page.rs: MIN_PAGE_WIDTH), so
+   that the lines of the document stay readable (about 65 characters). A smaller window
+   makes the panel narrower; a larger window gives the saved width again. */
+
+:root {
+  --panel-size: clamp(160px, var(--panel-width, 260px), calc(100vw - 600px));
+}
+
+/* History panel (left side): the files of this session. The page script sets
+   <html data-panel="show"> or "hide". */
+
+.mdviewer-history {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 11;
+  display: none;
+  box-sizing: border-box;
+  width: var(--panel-size);
+  padding: 44px 8px 16px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.4;
+  background: var(--bg-subtle);
+  border-right: 1px solid var(--border);
+}
+
+:root[data-panel="show"] .mdviewer-history {
+  display: block;
+}
+
+:root[data-panel="show"] body {
+  padding-left: var(--panel-size);
+}
+
+/* The line at the right side of the panel that changes its width (viewer.js). It is
+   6 px wide, so that it is easy to catch with the mouse; only 2 px show color. */
+
+.mdviewer-resizer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--panel-size) - 3px);
+  z-index: 13;
+  display: none;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+:root[data-panel="show"] .mdviewer-resizer {
+  display: block;
+}
+
+.mdviewer-resizer:hover,
+.mdviewer-resizer:focus-visible,
+:root[data-resizing] .mdviewer-resizer {
+  background: linear-gradient(to right, transparent 2px, var(--link) 2px, var(--link) 4px, transparent 4px);
+  outline: none;
+}
+
+/* While the user drags: the same cursor everywhere, and no text selection. */
+:root[data-resizing],
+:root[data-resizing] * {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+/* In a narrow window, the panel covers the page instead. */
+@media (max-width: 767px) {
+  :root[data-panel="show"] body {
+    padding-left: 0;
+  }
+
+  .mdviewer-history {
+    box-shadow: 0 4px 12px light-dark(#1f232826, #01040966);
+  }
+}
+
+.mdviewer-history h2 {
+  margin: 0 8px 8px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mdviewer-history ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mdviewer-history button {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mdviewer-history button:hover,
+.mdviewer-history button:focus-visible {
+  background: var(--code-bg);
+}
+
+.mdviewer-history button[aria-current="page"] {
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--link);
+}
+
+.mdviewer-history-name,
+.mdviewer-history-folder {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.mdviewer-history-folder {
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* The tree: 12 px for each level, at most 8 levels (page.rs: MAX_PANEL_DEPTH). */
+
+.mdviewer-history li[data-depth="1"] { padding-left: 12px; }
+.mdviewer-history li[data-depth="2"] { padding-left: 24px; }
+.mdviewer-history li[data-depth="3"] { padding-left: 36px; }
+.mdviewer-history li[data-depth="4"] { padding-left: 48px; }
+.mdviewer-history li[data-depth="5"] { padding-left: 60px; }
+.mdviewer-history li[data-depth="6"] { padding-left: 72px; }
+.mdviewer-history li[data-depth="7"] { padding-left: 84px; }
+.mdviewer-history li[data-depth="8"] { padding-left: 96px; }
+
+/* A thin line at the left of each child, so that the levels are easy to see. It is a
+   border, so that the mark of the current node (a box-shadow) stays visible. */
+.mdviewer-history li:not([data-depth="0"]) button {
+  border-left: 1px solid var(--border);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Another visit of a file that is on an earlier line. */
+.mdviewer-history-repeated button {
+  opacity: 0.6;
+}
+
+.mdviewer-history-empty {
+  margin: 0 8px;
+  color: var(--fg-muted);
+}
+
+/* Status bar (bottom left): the address of the link under the mouse, as in a browser. */
+
+.mdviewer-status {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  max-width: min(70%, 640px);
+  padding: 3px 8px;
+  overflow: hidden;
+  color: var(--fg);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-left: 0;
+  border-top-right-radius: 6px;
+  pointer-events: none;
+}
+
+.mdviewer-status[hidden] {
+  display: none;
+}
+
+@media print {
+  .mdviewer-toolbar,
+  .mdviewer-nav,
+  :root[data-panel="show"] .mdviewer-history,
+  :root[data-panel="show"] .mdviewer-resizer,
+  .mdviewer-status {
+    display: none;
+  }
+
+  :root[data-panel="show"] body {
+    padding-left: 0;
+  }
+}
+
+/* Embedded content that the CSP blocks (iframe, object, embed) */
+
+.mdviewer-blocked {
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  color: var(--fg-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  background: var(--bg-subtle);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+
+/* Obsidian wiki links that were not found when the page opened (a click searches). */
+
+a[data-wikilink] {
+  opacity: 0.65;
+}
+
+/* Short messages from the viewer, for example "Note not found" */
+
+.mdviewer-notice {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 20;
+  max-width: 80%;
+  padding: 8px 16px;
+  color: var(--fg);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px light-dark(#1f232826, #01040966);
+  transform: translateX(-50%);
+}
+
+/* Messages from the viewer, for example "file not found" */
+
+.mdviewer-message {
+  margin-top: 15vh;
+  text-align: center;
+}
+
+.mdviewer-message h1 {
+  border: 0;
+}
+
+.mdviewer-message p {
+  color: var(--fg-muted);
+}

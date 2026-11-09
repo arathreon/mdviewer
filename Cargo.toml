@@ -1,0 +1,41 @@
+[package]
+name = "mdviewer"
+version = "0.1.0"
+edition = "2024"
+description = "Fast read-only Markdown viewer with automatic dialect detection"
+
+[dependencies]
+comrak = { version = "0.59.0", default-features = false, features = ["shortcodes"] }
+log = "0.4.35"
+tao = "0.37.2"
+wry = "0.57.1"
+# The next two are already dependencies of wry, so they add no new crates.
+percent-encoding = "2.3.2"
+url = "2.5.8"
+
+# Only for `src/platform/windows`. They are already dependencies of wry on Windows, so
+# they add no new crates.
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39.1"
+windows-core = "0.62.2"
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_UI_Shell",
+    "Win32_UI_Shell_Common",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# CLAUDE.md: "Code MUST be documented with comments and docstrings." These lints make
+# `cargo clippy -- -D warnings` fail for an item without a doc comment.
+[lints.rust]
+missing_docs = "warn"
+
+[lints.clippy]
+missing_docs_in_private_items = "warn"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
