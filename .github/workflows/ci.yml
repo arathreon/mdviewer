@@ -1,0 +1,93 @@
+# Continuous integration: the same checks as in README.md ("Development").
+#
+# Only Windows: the viewer compiles only for Windows (see `src/platform/mod.rs`).
+# Only official GitHub actions, each pinned to a full commit hash (a tag can move to
+# other code, a commit hash cannot). The comment after the hash gives the version.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # release.yml runs this workflow as its test job, so a release runs the same checks.
+  workflow_call:
+
+# The workflow only reads the repository.
+permissions:
+  contents: read
+
+# A new push to the same branch or pull request stops the old run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # CI builds each version one time; incremental files only make the cache larger.
+  CARGO_INCREMENTAL: "0"
+  # `cargo doc` fails for broken doc links and other doc warnings.
+  RUSTDOCFLAGS: -D warnings
+
+jobs:
+  test:
+    name: Test (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The token is not kept in the checkout; no step needs it.
+          persist-credentials: false
+
+      - name: Install Rust (stable, with clippy and rustfmt)
+        id: rust
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt
+          rustup default stable
+          rustc --version
+          echo "version=$(rustc --version)" >> "$GITHUB_OUTPUT"
+
+      # The JavaScript tests use Node's built-in test runner (no npm packages).
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      # The key changes when Cargo.lock or the Rust version changes.
+      - name: Cache Cargo downloads and build files
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: cargo-${{ runner.os }}-${{ steps.rust.outputs.version }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-${{ steps.rust.outputs.version }}-
+
+      - name: Format
+        run: cargo fmt --check
+
+      # Also fails for an item without a doc comment (see [lints] in Cargo.toml).
+      - name: Lints
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      # Rust unit tests, and the JavaScript tests through tests/page_script.rs.
+      - name: Tests
+        run: |
+          node --version
+          cargo test --locked
+
+      - name: Documentation
+        run: cargo doc --no-deps --locked
+
+      # Fails if a crate in the program has a license that is not accepted, or no license
+      # text (see tools/notices.mjs). The release puts these notices into the zip file.
+      - name: Licenses of the Rust crates
+        run: node tools/notices.mjs cargo --check

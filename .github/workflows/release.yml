@@ -1,0 +1,107 @@
+# Release: runs only when a release is published on GitHub ("Releases" -> "Draft a new
+# release" -> "Publish release"). A draft starts nothing.
+#
+# 1. version: the tag must be the version in Cargo.toml (for example "v0.1.0").
+# 2. test:    all checks of ci.yml (the same file, so both lists are always the same).
+# 3. build:   the release build, packed as a zip with a SHA-256 file, added to the release.
+#             The zip has the licenses of mdviewer, the browser libraries and the Rust
+#             crates (see .github/scripts/package-release.ps1).
+#
+# If a job fails, the release stays without files. Fix the cause, then use "Re-run
+# jobs" for this run, or delete the release and publish it again.
+#
+# Only official GitHub actions, each pinned to a full commit hash (see ci.yml).
+name: Release
+
+on:
+  release:
+    types: [published]
+
+# Read only; the build job alone gets the right to add files to the release.
+permissions:
+  contents: read
+
+# One run for each release at a time. A running release is never stopped.
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Check the version
+    runs-on: windows-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compare the tag with Cargo.toml
+        id: check
+        shell: pwsh
+        env:
+          # The tag goes through an environment variable, never into the script text,
+          # so that an unusual tag name cannot become a command.
+          TAG: ${{ github.event.release.tag_name }}
+        run: ./.github/scripts/check-release-version.ps1 -Tag $env:TAG
+
+  test:
+    name: Tests
+    needs: version
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build and upload
+    needs: [version, test]
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      # Only this job can add files to the release.
+      contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust (stable)
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+
+      # The package script runs tools/notices.mjs (the notices of the Rust crates).
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      # The [profile.release] in Cargo.toml: LTO, one code unit, symbols stripped.
+      - name: Build the release version
+        shell: bash
+        run: cargo build --release --locked
+
+      - name: Pack the zip file and the checksum
+        shell: pwsh
+        run: ./.github/scripts/package-release.ps1 -Version $env:VERSION -OutDir dist
+
+      # The GitHub CLI is installed on the runner. --clobber replaces files of an earlier
+      # run of the same release.
+      - name: Add the files to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$TAG" \
+            "dist/mdviewer-$VERSION-windows-x64.zip" \
+            "dist/mdviewer-$VERSION-windows-x64.zip.sha256" \
+            --clobber --repo "$GITHUB_REPOSITORY"

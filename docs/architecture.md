@@ -419,6 +419,26 @@ A port to macOS (WKWebView) or Linux (WebKitGTK) must add `platform/macos/` or
   fake has no `<html>` element while `viewer.js` starts (a window test found this error).
 - **Lints:** `cargo clippy --all-targets -- -D warnings` fails for any warning, also for
   an item without a doc comment (`missing_docs`, `missing_docs_in_private_items`).
+- **CI** (`.github/workflows/ci.yml`): GitHub Actions on `windows-latest` runs
+  `cargo fmt --check`, clippy, `cargo test` (with Node.js 24) and `cargo doc`, all with
+  `--locked`. It uses only official GitHub actions, each pinned to a commit hash, and
+  only reads the repository. The runner's `%TEMP%` usually has a short 8.3 name
+  (`C:\Users\RUNNER~1\...`), so CI also checks the tests with short paths.
+- **Release** (`.github/workflows/release.yml`): runs only when a release is published
+  on GitHub. Job 1 checks that the tag is the `Cargo.toml` version
+  (`.github/scripts/check-release-version.ps1`). Job 2 calls `ci.yml` itself
+  (`workflow_call`), so a release always runs the same checks. Job 3 builds with
+  `--release --locked`, packs the zip with all licenses and notices
+  (`.github/scripts/package-release.ps1`), and uploads it with `gh release upload`. Only
+  job 3 has `contents: write`. The two scripts were tested by hand (correct and wrong
+  tags; zip content; `sha256sum -c`; no local paths and correct UTF-8 in the notices).
+- **Licenses** (`tools/notices.mjs`, tested in `tests/js/notices.test.mjs`): makes the
+  notices of the Rust crates (from `cargo metadata`: normal dependencies only, no
+  proc-macro crates) and of the npm packages inside Mermaid, and accepts only the
+  licenses in `ACCEPTED_LICENSES`. Other cases need a reviewed entry with the exact
+  version (`REVIEWED_PACKAGES`). CI runs `node tools/notices.mjs cargo --check`.
+  `tests/licenses.rs` checks that `LICENSE`, each vendor `LICENSE`, `katex/OFL.txt` and
+  the Mermaid notices are in the repository.
 - **Window tests** were done by hand with PowerShell scripts that start the viewer, send
   keys and clicks, and take screenshots. These scripts check before each key that the
   viewer is the front window.
@@ -466,3 +486,9 @@ A port to macOS (WKWebView) or Linux (WebKitGTK) must add `platform/macos/` or
 | 2026-11-09 | `dialects.ini` separate from `settings.ini`, split at the last `=` | `settings.ini` has fixed keys; this is a list that grows. Folder names can contain `=`, dialect ids cannot. |
 | 2026-11-09 | Detection runs also with a manual choice | The selector shows what "Auto" would give, and the log shows both. The cost is a few microseconds. |
 | 2026-11-09 | Tests stop the folder search at their temporary folder and do not read Obsidian's real vault list | An experiment showed 6 failed tests when `%TEMP%` was in a Git repository, in a vault, or had `'` and `&` in its path. The program was correct; the tests depended on the computer. |
+| 2026-11-10 | Release as a zip file (exe, README, library licenses), built by GitHub Actions | The licenses of KaTeX, Mermaid, highlight.js, Octicons and Lucide require their notices with each copy. A build on GitHub has no personal paths of the developer's computer in the exe. |
+| 2026-11-10 | mdviewer uses the MIT license; the copyright holder is the GitHub name of the author | The author chose MIT. The code must not contain personal data, so the public GitHub name is used, not a real name. |
+| 2026-11-10 | The notices of the Rust crates are made at each release from `Cargo.lock`, not committed | A committed list becomes wrong after `cargo update`. CI checks the licenses on each push, so a problem shows early. |
+| 2026-11-10 | The Mermaid notices are committed, made from an npm install with `--before` the Mermaid publish date | The Mermaid files are committed too and change only with Mermaid. npm cannot give the exact versions of the Mermaid bundle (it was built from Mermaid's own lock file), so the file says that patch versions can differ; the licenses do not. |
+| 2026-11-10 | Keep ELK (EPL-2.0) inside Mermaid, with the source address in the notices | EPL-2.0 does not change the license of mdviewer; it asks for the license text and the place of the source code. Removing the 1.6 MB chunk would break diagrams with `layout: elk`; this can be decided later. |
+| 2026-11-10 | The KaTeX fonts get their own `OFL.txt` | The fonts use the SIL OFL 1.1 (their own metadata says so), not KaTeX's MIT license, and the npm package has no OFL text. |

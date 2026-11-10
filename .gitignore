@@ -1,2 +1,5 @@
 /target
 .claude/settings.local.json
+/dist
+# Local MCP server settings of each developer
+/.mcp.json

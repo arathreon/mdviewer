@@ -3,6 +3,7 @@ name = "mdviewer"
 version = "0.1.0"
 edition = "2024"
 description = "Fast read-only Markdown viewer with automatic dialect detection"
+license = "MIT"
 
 [dependencies]
 comrak = { version = "0.59.0", default-features = false, features = ["shortcodes"] }

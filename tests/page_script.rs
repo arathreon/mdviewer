@@ -1,5 +1,6 @@
-//! Runs the JavaScript tests of the page scripts (`assets/viewer.js`, `assets/render.mjs`)
-//! with Node.js, so that `cargo test` runs all tests. Node.js must be installed.
+//! Runs the JavaScript tests with Node.js, so that `cargo test` runs all tests: the page
+//! scripts (`assets/viewer.js`, `assets/render.mjs`) and the notices tool
+//! (`tools/notices.mjs`). Node.js must be installed.
 
 use std::process::Command;
 
@@ -10,6 +11,7 @@ fn page_script_tests_pass() {
             "--test",
             "tests/js/viewer.test.mjs",
             "tests/js/render.test.mjs",
+            "tests/js/notices.test.mjs",
         ])
         .current_dir(env!("CARGO_MANIFEST_DIR"))
         .output()

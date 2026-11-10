@@ -148,10 +148,31 @@ cargo clippy --all-targets -- -D warnings    # also fails for code without doc c
 cargo fmt
 ```
 
+- GitHub Actions runs the same checks (format, lints, tests, docs) on Windows for each
+  push to `main` and each pull request: [.github/workflows/ci.yml](.github/workflows/ci.yml).
 - The architecture, the data flow and the design decisions are in
   [docs/architecture.md](docs/architecture.md).
-- The third-party libraries (versions, hashes, update steps) are in
+- The third-party libraries (versions, hashes, licenses, update steps) are in
   [assets/vendor/README.md](assets/vendor/README.md).
+
+### Release
+
+1. Set the new version in `Cargo.toml` (for example `version = "0.2.0"`), and commit it.
+2. On GitHub, open "Releases" → "Draft a new release". Make the tag `v0.2.0` (the version
+   with a `v`), and click "Publish release".
+3. [.github/workflows/release.yml](.github/workflows/release.yml) then checks that the
+   tag is the version, runs all checks of `ci.yml`, makes the release build, and adds
+   two files to the release:
+   - `mdviewer-0.2.0-windows-x64.zip`: `mdviewer.exe`, this README, `LICENSE.txt`, and
+     in `licenses/` the licenses of the embedded libraries and the notices of the Rust
+     crates (made from `Cargo.lock` by `tools/notices.mjs`);
+   - `mdviewer-0.2.0-windows-x64.zip.sha256`: the checksum, for `sha256sum -c` or
+     `Get-FileHash`.
+
+If a step fails, the release has no files. Fix the cause, then use "Re-run jobs" in the
+"Actions" tab. To make the zip file locally: `cargo build --release --locked`, then
+`./.github/scripts/package-release.ps1 -Version 0.2.0` (output in `dist\`; needs
+Node.js).
 
 ## Limits
 
@@ -161,3 +182,15 @@ cargo fmt
 - mdviewer is not yet registered as the program for `.md` files in File Explorer.
 - Windows only. The system code is in `src/platform/`, so that a port to macOS or Linux
   is possible later; `docs/architecture.md` ("Platforms") lists what a port must do.
+
+## License
+
+mdviewer uses the [MIT license](LICENSE).
+
+The program contains third-party code with its own licenses, all of them permissive:
+the browser libraries (MIT, ISC, BSD-3-Clause; the KaTeX fonts use the SIL Open Font
+License 1.1; inside Mermaid also Apache-2.0 and, for the ELK layout, the Eclipse Public
+License 2.0) and the Rust crates (mostly MIT or Apache-2.0; also BSD-2-Clause, Zlib and
+the Unicode license). The details are in
+[assets/vendor/README.md](assets/vendor/README.md), and each release zip file has all
+license texts in its `licenses/` folder.
