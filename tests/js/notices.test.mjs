@@ -2,21 +2,28 @@
 // fake metadata and fake node_modules folders, so they need no network and no npm.
 
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
+  USAGE,
   cargoPackages,
   isAccepted,
   licenseTexts,
   npmLicense,
   npmPackages,
+  parseArgs,
   problems,
   render,
   withReviews,
 } from '../../tools/notices.mjs';
+
+/** The tool itself, for the tests of the command line. */
+const TOOL = fileURLToPath(new URL('../../tools/notices.mjs', import.meta.url));
 
 /** Temporary folders of the current test; removed after each test. */
 const folders = [];
@@ -215,4 +222,72 @@ test('render: list, notes, shared texts, and no folder paths', () => {
   assert.ok(text.includes('=== c 3.0.0 (LICENSE)\n\nISC text\n'), text);
   assert.ok(!text.includes('Users') && !text.includes('.cargo'), text);
   assert.ok(!text.includes('\r') && text.endsWith('\n'), text);
+});
+
+test('command line arguments: options at any position, errors are not guessed', () => {
+  // The first case failed in CI: without --out, the old code removed the first argument.
+  assert.deepEqual(parseArgs(['cargo', '--check']), { mode: 'cargo', check: true, outFile: undefined });
+  assert.deepEqual(parseArgs(['--check', 'cargo']), { mode: 'cargo', check: true, outFile: undefined });
+  assert.deepEqual(parseArgs(['cargo']), { mode: 'cargo', check: false, outFile: undefined });
+  assert.deepEqual(parseArgs(['cargo', '--out', 'a.txt']), { mode: 'cargo', check: false, outFile: 'a.txt' });
+  assert.deepEqual(parseArgs(['--out', 'a.txt', 'cargo']), { mode: 'cargo', check: false, outFile: 'a.txt' });
+  assert.deepEqual(parseArgs(['npm', 'dir', 'mermaid', '--check']), {
+    mode: 'npm', projectDir: 'dir', rootName: 'mermaid', check: true, outFile: undefined,
+  });
+  assert.deepEqual(parseArgs(['npm', '--out', 'b.txt', 'dir', 'mermaid']), {
+    mode: 'npm', projectDir: 'dir', rootName: 'mermaid', check: false, outFile: 'b.txt',
+  });
+  for (const [args, error] of [
+    [[], 'wrong arguments'],
+    [['--check'], 'wrong arguments'],
+    [['cargo', 'extra'], 'wrong arguments'],
+    [['npm', 'dir'], 'wrong arguments'],
+    [['npm', 'dir', 'mermaid', 'extra'], 'wrong arguments'],
+    [['rust'], 'wrong arguments'],
+    [['cargo', '--out'], '--out needs a file name'],
+    [['cargo', '--out', '--check'], '--out needs a file name'],
+    [['cargo', '--chek'], 'unknown option --chek'],
+    [['cargo', '--check', '--out', 'a.txt'], 'use --check or --out, not both'],
+  ]) {
+    assert.deepEqual(parseArgs(args), { error }, JSON.stringify(args));
+  }
+});
+
+/** Runs the tool with `args` in a separate Node.js process. */
+function runTool(args) {
+  return spawnSync(process.execPath, [TOOL, ...args], { encoding: 'utf8' });
+}
+
+/** Makes a fake npm project: "root" needs "y" (ISC, with its license file). */
+function npmProject() {
+  const dir = tempDir();
+  writeTree(dir, {
+    'node_modules/root/package.json': { name: 'root', version: '1.0.0', license: 'MIT', dependencies: { y: '^1' } },
+    'node_modules/y/package.json': { name: 'y', version: '1.2.3', license: 'ISC' },
+    'node_modules/y/LICENSE': 'ISC License\n\nCopyright (c) y authors\n',
+  });
+  return dir;
+}
+
+test('command line: --check, --out, and wrong arguments', () => {
+  const dir = npmProject();
+
+  const checked = runTool(['npm', dir, 'root', '--check']);
+  assert.equal(checked.status, 0, checked.stderr);
+  assert.equal(checked.stdout, '');
+  assert.match(checked.stderr, /^1 packages, all licenses accepted\.\n$/);
+
+  // The output file is in a folder with difficult characters, and has UTF-8 and LF only.
+  const out = join(dir, 'notices é&.txt');
+  const written = runTool(['npm', dir, 'root', '--out', out]);
+  assert.equal(written.status, 0, written.stderr);
+  const text = readFileSync(out, 'utf8');
+  assert.ok(text.startsWith('Third-party notices: libraries inside root\n'), text);
+  assert.ok(text.includes('\ny 1.2.3  ISC\n'), text);
+  assert.ok(text.includes('Copyright (c) y authors'), text);
+  assert.ok(!text.includes('\r') && !text.includes(dir), text);
+
+  const wrong = runTool(['cargo', 'extra']);
+  assert.equal(wrong.status, 2);
+  assert.equal(wrong.stderr, `wrong arguments\n${USAGE}`);
 });

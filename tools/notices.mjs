@@ -11,8 +11,9 @@
 //
 // The text goes to the standard output (UTF-8, LF line ends), or with --out <file> into
 // that file (safer from PowerShell, which can change the characters of the standard
-// output). With --check, the tool only checks the licenses. If a license is not acceptable, or a package has no license text, the
-// tool writes the problems to the standard error and exits with code 1.
+// output). With --check, the tool only checks the licenses. If a license is not
+// acceptable, or a package has no license text, the tool writes the problems to the
+// standard error and exits with code 1. Wrong arguments give exit code 2.
 //
 // The output contains no folder paths (the crates are below the user's home folder).
 // The tool only reads files.
@@ -366,16 +367,56 @@ function hostTarget() {
   return /^host: (.+)$/m.exec(info)[1].trim();
 }
 
+/** The help text for wrong arguments. */
+export const USAGE =
+  'usage: node tools/notices.mjs cargo [--check | --out <file>]\n' +
+  '       node tools/notices.mjs npm <project folder> <package> [--check | --out <file>]\n';
+
+/**
+ * Reads the command line arguments (without "node" and the script). The options can be
+ * at any position. The tool does not guess: an unknown option, a missing file name, or
+ * --check together with --out is an error.
+ *
+ * @param {string[]} args The arguments.
+ * @returns {{mode: 'cargo', check: boolean, outFile?: string}
+ *   | {mode: 'npm', projectDir: string, rootName: string, check: boolean, outFile?: string}
+ *   | {error: string}} The parsed arguments, or the error message.
+ */
+export function parseArgs(args) {
+  let check = false;
+  let outFile;
+  const positional = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--check') {
+      check = true;
+    } else if (arg === '--out') {
+      i += 1;
+      outFile = args[i];
+      if (outFile === undefined || outFile.startsWith('--')) return { error: '--out needs a file name' };
+    } else if (arg.startsWith('--')) {
+      return { error: `unknown option ${arg}` };
+    } else {
+      positional.push(arg);
+    }
+  }
+  if (check && outFile !== undefined) return { error: 'use --check or --out, not both' };
+  const [mode, ...rest] = positional;
+  if (mode === 'cargo' && rest.length === 0) return { mode, check, outFile };
+  if (mode === 'npm' && rest.length === 2) {
+    return { mode, projectDir: rest[0], rootName: rest[1], check, outFile };
+  }
+  return { error: 'wrong arguments' };
+}
+
 /** Runs the command line (see the top of this file). Gives the exit code. */
 function main(args) {
-  const check = args.includes('--check');
-  const outAt = args.indexOf('--out');
-  const outFile = outAt >= 0 ? args[outAt + 1] : undefined;
-  if (outAt >= 0 && !outFile) {
-    process.stderr.write('--out needs a file name\n');
+  const parsed = parseArgs(args);
+  if ('error' in parsed) {
+    process.stderr.write(`${parsed.error}\n${USAGE}`);
     return 2;
   }
-  const [mode, ...rest] = args.filter((arg, i) => arg !== '--check' && i !== outAt && i !== outAt + 1);
+  const { mode, check, outFile } = parsed;
   let title;
   let intro;
   let packages;
@@ -392,8 +433,8 @@ function main(args) {
       'its version, its license (an SPDX expression; "A OR B" means that you can choose)\n' +
       'and its repository. The license texts follow; crates with the same text share one\n' +
       'copy. Made by tools/notices.mjs from Cargo.lock.';
-  } else if (mode === 'npm' && rest.length === 2) {
-    const [projectDir, rootName] = rest;
+  } else {
+    const { projectDir, rootName } = parsed;
     packages = npmPackages(projectDir, rootName);
     title = `Third-party notices: libraries inside ${rootName}`;
     intro =
@@ -406,10 +447,6 @@ function main(args) {
       'built from their own lock file, so they can contain other patch versions (their\n' +
       'remaining license comments name them, for example DOMPurify). The licenses are the\n' +
       'same.';
-  } else {
-    process.stderr.write('usage: node tools/notices.mjs cargo [--check | --out <file>]\n' +
-      '       node tools/notices.mjs npm <project folder> <package> [--check | --out <file>]\n');
-    return 2;
   }
   packages = withReviews(packages);
   const textsOf = (pkg) => licenseTexts(pkg);
