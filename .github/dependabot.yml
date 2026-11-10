@@ -1,0 +1,45 @@
+# Dependabot: pull requests for new versions of the dependencies, once a month.
+#
+# - github-actions: the actions in .github/workflows. They are pinned to commit hashes
+#   (see ci.yml), so without this they would never get new versions or security fixes.
+# - cargo: Cargo.toml and Cargo.lock. CI runs on each pull request, also the license
+#   check (tools/notices.mjs), so a new crate with an unknown license fails there.
+#
+# Not here: the browser libraries in assets/vendor. They are copied by hand, without a
+# package.json; their update steps are in assets/vendor/README.md.
+#
+# cooldown: only versions that were published at least 14 days ago, the same rule as for
+# the browser libraries. A bad or malicious release is usually found and withdrawn in
+# that time. Security updates do not wait (GitHub applies cooldown only to version
+# updates).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    # "/" means the workflow files in .github/workflows.
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    groups:
+      # All actions in one pull request.
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 14
+    groups:
+      # Minor and patch updates in one pull request; each major update gets its own,
+      # because it can need code changes. Note: for 0.x crates, Dependabot calls
+      # 0.53 -> 0.54 "minor", but Cargo treats it as a breaking change; CI shows it.
+      cargo-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps

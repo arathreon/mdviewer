@@ -151,6 +151,10 @@ cargo fmt
 
 - GitHub Actions runs the same checks (format, lints, tests, docs) on Windows for each
   push to `main` and each pull request: [.github/workflows/ci.yml](.github/workflows/ci.yml).
+- Dependabot makes pull requests for new versions of the GitHub actions and the Rust
+  crates, once a month, only for versions that are at least 14 days old:
+  [.github/dependabot.yml](.github/dependabot.yml). The browser libraries are updated by
+  hand.
 - The architecture, the data flow and the design decisions are in
   [docs/architecture.md](docs/architecture.md).
 - The third-party libraries (versions, hashes, licenses, update steps) are in
