@@ -426,12 +426,13 @@ A port to macOS (WKWebView) or Linux (WebKitGTK) must add `platform/macos/` or
   (`C:\Users\RUNNER~1\...`), so CI also checks the tests with short paths.
 - **Release** (`.github/workflows/release.yml`): runs only when a release is published
   on GitHub. Job 1 checks that the tag is the `Cargo.toml` version
-  (`.github/scripts/check-release-version.ps1`). Job 2 calls `ci.yml` itself
-  (`workflow_call`), so a release always runs the same checks. Job 3 builds with
-  `--release --locked`, packs the zip with all licenses and notices
+  (`.github/scripts/check-release-version.ps1`); a pre-release can add a suffix
+  (`v0.1.0-rc.1`). `tests/release_version.rs` tests these rules with PowerShell 7. Job 2
+  calls `ci.yml` itself (`workflow_call`), so a release always runs the same checks.
+  Job 3 builds with `--release --locked`, packs the zip with all licenses and notices
   (`.github/scripts/package-release.ps1`), and uploads it with `gh release upload`. Only
-  job 3 has `contents: write`. The two scripts were tested by hand (correct and wrong
-  tags; zip content; `sha256sum -c`; no local paths and correct UTF-8 in the notices).
+  job 3 has `contents: write`. The package script was tested by hand (zip content;
+  `sha256sum -c`; no local paths and correct UTF-8 in the notices).
 - **Licenses** (`tools/notices.mjs`, tested in `tests/js/notices.test.mjs`): makes the
   notices of the Rust crates (from `cargo metadata`: normal dependencies only, no
   proc-macro crates) and of the npm packages inside Mermaid, and accepts only the
@@ -490,5 +491,6 @@ A port to macOS (WKWebView) or Linux (WebKitGTK) must add `platform/macos/` or
 | 2026-11-10 | mdviewer uses the MIT license; the copyright holder is the GitHub name of the author | The author chose MIT. The code must not contain personal data, so the public GitHub name is used, not a real name. |
 | 2026-11-10 | The notices of the Rust crates are made at each release from `Cargo.lock`, not committed | A committed list becomes wrong after `cargo update`. CI checks the licenses on each push, so a problem shows early. |
 | 2026-11-10 | The Mermaid notices are committed, made from an npm install with `--before` the Mermaid publish date | The Mermaid files are committed too and change only with Mermaid. npm cannot give the exact versions of the Mermaid bundle (it was built from Mermaid's own lock file), so the file says that patch versions can differ; the licenses do not. |
-| 2026-11-10 | Keep ELK (EPL-2.0) inside Mermaid, with the source address in the notices | EPL-2.0 does not change the license of mdviewer; it asks for the license text and the place of the source code. Removing the 1.6 MB chunk would break diagrams with `layout: elk`; this can be decided later. |
+| 2026-11-10 | Keep ELK (EPL-2.0) inside Mermaid, with the source addresses in the notices | EPL-2.0 does not change the license of mdviewer; it asks for the license text and the place of the source code. elkjs is ELK's Java code compiled to JavaScript, so the notice names both repositories: elkjs (tag 0.9.3) and `eclipse-elk/elk` (v0.9.1 with change #955, as the elkjs release notes state; no file names the exact commit). Removing the 1.6 MB chunk would break diagrams with `layout: elk`. The author chose to keep it. |
+| 2026-11-10 | A pre-release tag can add a suffix to the `Cargo.toml` version (`v0.1.0-rc.1`); a release tag cannot | Test builds before a release need no change of `Cargo.toml` and `Cargo.lock`. The zip name has the full tag version, so the files of two pre-releases differ. The exe reports the `Cargo.toml` version, but only in its log. A release must match exactly, so a final release cannot get a wrong version. |
 | 2026-11-10 | The KaTeX fonts get their own `OFL.txt` | The fonts use the SIL OFL 1.1 (their own metadata says so), not KaTeX's MIT license, and the npm package has no OFL text. |

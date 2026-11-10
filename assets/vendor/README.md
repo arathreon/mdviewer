@@ -32,7 +32,11 @@ checks that they are here.
   - **elkjs** (`chunks/mermaid.esm.min/elk-*.mjs`, 1.6 MB, loaded only for
     `layout: elk`): Eclipse Public License 2.0. EPL-2.0 does not change the license
     of mdviewer, but users must be told where the source code is; the notices file
-    does this (https://github.com/kieler/elkjs, tag 0.9.3).
+    does this. elkjs is the Java code of ELK, compiled to JavaScript, so the file
+    names both: https://github.com/kieler/elkjs (tag 0.9.3) and
+    https://github.com/eclipse-elk/elk (v0.9.1 with change #955, from the elkjs 0.9.3
+    release notes). For a new elkjs version, find the ELK version on its release page
+    and update the note in `REVIEWED_PACKAGES`.
 - The Rust crates are not here: the release makes their notices from `Cargo.lock`
   (`node tools/notices.mjs cargo`), and CI checks their licenses on each push.
 

@@ -69,8 +69,13 @@ export const REVIEWED_PACKAGES = {
     accept: 'EPL-2.0',
     note:
       'Eclipse Public License 2.0. mdviewer contains elkjs unchanged, inside Mermaid ' +
-      '(chunks/mermaid.esm.min/elk-*.mjs). The source code of elkjs 0.9.3 is available ' +
-      'at https://github.com/kieler/elkjs (tag 0.9.3) and on npm (elkjs@0.9.3).',
+      '(chunks/mermaid.esm.min/elk-*.mjs). elkjs is the Java code of the Eclipse Layout ' +
+      'Kernel (ELK, also EPL-2.0), compiled to JavaScript. The source code: elkjs at ' +
+      'https://github.com/kieler/elkjs (tag 0.9.3: the JavaScript part and the build), ' +
+      'and ELK at https://github.com/eclipse-elk/elk (release v0.9.1 with the change ' +
+      'eclipse-elk/elk#955, as the release notes of elkjs 0.9.3 state: ' +
+      'https://github.com/kieler/elkjs/releases/tag/0.9.3). The built files are also on ' +
+      'npm (elkjs@0.9.3).',
   },
 };
 

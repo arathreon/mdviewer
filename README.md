@@ -23,7 +23,8 @@ colored code (highlight.js). Alerts and callouts have monochrome icons, as on Gi
 
 - Windows 10 or 11 with the **Microsoft Edge WebView2 Runtime** (Windows 11 has it).
 - To build: Rust (edition 2024) with the MSVC toolchain.
-- To run the tests: **Node.js** (the JavaScript tests use Node's built-in test runner).
+- To run the tests: **Node.js** (the JavaScript tests use Node's built-in test runner)
+  and **PowerShell 7** (`pwsh`; the tests of the release scripts).
 
 ## Build
 
@@ -168,6 +169,13 @@ cargo fmt
      crates (made from `Cargo.lock` by `tools/notices.mjs`);
    - `mdviewer-0.2.0-windows-x64.zip.sha256`: the checksum, for `sha256sum -c` or
      `Get-FileHash`.
+
+**Pre-releases** (test builds before a release) need no change of `Cargo.toml`: select
+"Set as a pre-release", and add a suffix to the tag, for example `v0.2.0-rc.1`, then
+`v0.2.0-rc.2`. The zip name has the suffix (`mdviewer-0.2.0-rc.1-windows-x64.zip`).
+When the test is good, publish the release `v0.2.0` without the checkbox. Only a
+pre-release can have a suffix. Use a dot (`rc.1`, not `rc1`), so that `rc.10` sorts
+after `rc.9`.
 
 If a step fails, the release has no files. Fix the cause, then use "Re-run jobs" in the
 "Actions" tab. To make the zip file locally: `cargo build --release --locked`, then

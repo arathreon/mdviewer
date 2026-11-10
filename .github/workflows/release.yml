@@ -1,7 +1,8 @@
 # Release: runs only when a release is published on GitHub ("Releases" -> "Draft a new
 # release" -> "Publish release"). A draft starts nothing.
 #
-# 1. version: the tag must be the version in Cargo.toml (for example "v0.1.0").
+# 1. version: the tag must be the version in Cargo.toml (for example "v0.1.0"). A
+#             pre-release can add a suffix ("v0.1.0-rc.1"), so it needs no new version.
 # 2. test:    all checks of ci.yml (the same file, so both lists are always the same).
 # 3. build:   the release build, packed as a zip with a SHA-256 file, added to the release.
 #             The zip has the licenses of mdviewer, the browser libraries and the Rust
@@ -46,7 +47,9 @@ jobs:
           # The tag goes through an environment variable, never into the script text,
           # so that an unusual tag name cannot become a command.
           TAG: ${{ github.event.release.tag_name }}
-        run: ./.github/scripts/check-release-version.ps1 -Tag $env:TAG
+          # "true" for "Set as a pre-release": then the tag can have a suffix (v0.1.0-rc.1).
+          PRERELEASE: ${{ github.event.release.prerelease }}
+        run: ./.github/scripts/check-release-version.ps1 -Tag $env:TAG -Prerelease:($env:PRERELEASE -eq 'true')
 
   test:
     name: Tests

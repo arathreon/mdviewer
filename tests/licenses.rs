@@ -87,6 +87,11 @@ fn the_mermaid_notices_name_the_bundled_libraries() {
     assert!(notices.contains("Eclipse Public License"), "no EPL text");
     assert!(
         notices.contains("https://github.com/kieler/elkjs"),
+        "no elkjs source address"
+    );
+    // elkjs is ELK's Java code, compiled; its source code is also in the ELK repository.
+    assert!(
+        notices.contains("https://github.com/eclipse-elk/elk (release v0.9.1"),
         "no ELK source address"
     );
     assert!(
